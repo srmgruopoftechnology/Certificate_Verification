@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>SRM IT Solutions — Certificate Verification</title>
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --primary: #0c9e4c;
+      --primary-dark: #0a7d3c;
+      --primary-light: #e8f5ee;
+      --secondary: #2c3e50;
+      --light-bg: #f8fafc;
+      --card-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    }
+    
+    body { 
+      font-family: 'Inter', sans-serif; 
+      background: var(--light-bg); 
+      color: var(--secondary);
+      opacity: 0; 
+      transform: translateY(20px); 
+      transition: all 0.8s ease-in-out; 
+    }
+    body.loaded { opacity: 1; transform: translateY(0); }
+    
+    .card { 
+      border: none; 
+      border-radius: 16px; 
+      box-shadow: var(--card-shadow); 
+      overflow: hidden;
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    
+    .logo { 
+      width: 60px; 
+      height: 60px; 
+      border-radius: 12px; 
+      background: linear-gradient(135deg, var(--primary), #1ec75f); 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      color:#fff; 
+      font-weight:700; 
+      font-size:20px; 
+      box-shadow: 0 4px 12px rgba(12, 158, 76, 0.3);
+    }
+    
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .logo-text h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--secondary);
+    }
+    
+    .logo-text p {
+      font-size: 0.875rem;
+      margin: 0;
+      color: #64748b;
+    }
+    
+    .btn-green { 
+      background: var(--primary); 
+      color: #fff; 
+      border-radius: 10px; 
+      font-weight: 600;
+      padding: 10px 20px;
+      border: none;
+      transition: all 0.3s ease;
+    }
+    .btn-green:hover { 
+      background: var(--primary-dark); 
+      color: #fff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(12, 158, 76, 0.3);
+    }
+    
+    .btn-outline-green {
+      background: transparent;
+      color: var(--primary);
+      border: 1px solid var(--primary);
+      border-radius: 10px;
+      font-weight: 600;
+      padding: 10px 20px;
+      transition: all 0.3s ease;
+    }
+    
+    .btn-outline-green:hover {
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+    
+    .hero-section {
+      background: linear-gradient(135deg, var(--primary-light) 0%, #f0f9ff 100%);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+    }
+    
+    .verification-box {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-left: 4px solid var(--primary);
+    }
+    
+    .result { 
+      margin-top: 1rem; 
+      padding: 1.5rem; 
+      border-radius: 0.75rem; 
+      background: #f0fff4; 
+      border: 1px dashed rgba(12,158,76,0.3); 
+    }
+    .notfound { 
+      background: #fff6f6; 
+      border-color: #ffd6d6; 
+    }
+    
+    footer { 
+      margin-top: 3rem; 
+      padding-top: 2rem;
+      border-top: 1px solid #e2e8f0;
+    }
+    
+    .visit-btn { 
+      margin-top: 10px; 
+    }
+    
+    /* Certificate Preview Section */
+    .certificate-preview {
+      display: none;
+      margin-top: 2rem;
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border: 1px solid #e2e8f0;
+    }
+    
+    .certificate-container {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .certificate-header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid var(--primary);
+    }
+    
+    .certificate-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 10px;
+    }
+    
+    .certificate-subtitle {
+      font-size: 1.2rem;
+      color: var(--secondary);
+      margin-bottom: 5px;
+    }
+    
+    .certificate-body {
+      margin-bottom: 30px;
+    }
+    
+    .certificate-name {
+      font-size: 2rem;
+      font-weight: 600;
+      text-align: center;
+      margin: 20px 0;
+      color: var(--primary);
+    }
+    
+    .certificate-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .certificate-detail-item {
+      margin-bottom: 10px;
+    }
+    
+    .certificate-detail-label {
+      font-weight: 600;
+      color: var(--secondary);
+    }
+    
+    .certificate-footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #e2e8f0;
+    }
+    
+    .signature-area {
+      text-align: center;
+      width: 45%;
+    }
+    
+    .signature-line {
+      border-top: 1px solid #2c3e50;
+      width: 80%;
+      margin: 0 auto 10px;
+      padding-top: 40px;
+    }
+    
+    .signature-name {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    
+    .signature-title {
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+    
+    .certificate-id {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: #64748b;
+    }
+    
+    /* Admin Panel Styles */
+    .admin-panel { display: none; }
+    .admin-card { 
+      background: #fff; 
+      border-radius: 12px; 
+      padding: 24px; 
+      margin-bottom: 20px; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+      border: 1px solid #e2e8f0;
+    }
+    .admin-table { 
+      width: 100%; 
+      border-collapse: collapse; 
+    }
+    .admin-table th, .admin-table td { 
+      padding: 12px; 
+      text-align: left; 
+      border-bottom: 1px solid #e2e8f0; 
+    }
+    .admin-table th { 
+      background-color: #f8fafc; 
+      font-weight: 600;
+      color: var(--secondary);
+    }
+    .action-btn { 
+      padding: 6px 12px; 
+      margin-right: 5px; 
+      border: none; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+    }
+    .edit-btn { 
+      background-color: #ffc107; 
+      color: #000; 
+    }
+    .edit-btn:hover {
+      background-color: #e0a800;
+    }
+    .delete-btn { 
+      background-color: #dc3545; 
+      color: #fff; 
+    }
+    .delete-btn:hover {
+      background-color: #c82333;
+    }
+    .login-container { 
+      max-width: 400px; 
+      margin: 100px auto; 
+      padding: 40px; 
+      background: white; 
+      border-radius: 16px; 
+      box-shadow: var(--card-shadow); 
+    }
+    
+    .form-control {
+      border-radius: 8px;
+      padding: 10px 15px;
+      border: 1px solid #cbd5e1;
+      transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(12, 158, 76, 0.1);
+    }
+    
+    .form-label {
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--secondary);
+    }
+    
+    .feature-icon {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+      font-size: 1.25rem;
+      margin-bottom: 15px;
+    }
+    
+    .feature-card {
+      padding: 20px;
+      border-radius: 12px;
+      background: white;
+      text-align: center;
+      transition: transform 0.3s ease;
+      height: 100%;
+    }
+    
+    .feature-card:hover {
+      transform: translateY(-5px);
+    }
+    
+    .contact-form {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .hero-section {
+        padding: 20px;
+      }
+      
+      .verification-box {
+        padding: 20px;
+      }
+      
+      .admin-card {
+        padding: 20px;
+      }
+      
+      .login-container {
+        margin: 50px auto;
+        padding: 30px 20px;
+      }
+      
+      .certificate-details {
+        grid-template-columns: 1fr;
+      }
+      
+      .certificate-footer {
+        flex-direction: column;
+        gap: 30px;
+      }
+      
+      .signature-area {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Main Verification Page -->
+  <div class="container py-4" id="verificationPage">
+    <div class="card p-4 p-md-5">
+      <div class="logo-container">
+        <div class="logo">SRM</div>
+        <div class="logo-text">
+          <h1>SRM IT Solutions</h1>
+          <p>Certificate Verification Portal</p>
+        </div>
+        <button class="btn btn-green ms-auto" id="adminLoginBtn">Admin Login</button>
+      </div>
+
+      <div class="hero-section">
+        <div class="row align-items-center">
+          <div class="col-lg-7">
+            <h2 class="mb-3">Verify Your Certificate</h2>
+            <p class="lead mb-4">Enter your certificate number to confirm authenticity and download your Attendance Certificate.</p>
+            
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <div class="feature-card">
+                  <div class="feature-icon">
+                    <i>✓</i>
+                  </div>
+                  <h5>Instant Verification</h5>
+                  <p class="small text-muted">Quickly verify certificate authenticity</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="feature-card">
+                  <div class="feature-icon">
+                    <i>📥</i>
+                  </div>
+                  <h5>Easy Download</h5>
+                  <p class="small text-muted">Download certificates in PDF format</p>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="feature-card">
+                  <div class="feature-icon">
+                    <i>🔒</i>
+                  </div>
+                  <h5>Secure & Valid</h5>
+                  <p class="small text-muted">All certificates are securely stored</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="d-flex align-items-center">
+              <div class="me-3">
+                <small class="text-muted">Format: SRMWDI0012</small>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-5">
+            <div class="verification-box">
+              <h5 class="mb-3">Enter Certificate Details</h5>
+              <div class="mb-3">
+                <label for="certNo" class="form-label">Certificate Number</label>
+                <input id="certNo" type="text" class="form-control" placeholder="e.g. SRMWDI0012">
+              </div>
+              <button id="verifyBtn" class="btn btn-green w-100">Verify Certificate</button>
+              <div id="result" class="result mt-3" style="display:none;"></div>
+              <div id="pdfButtons" class="mt-3" style="display:none;">
+                <button id="downloadAttend" class="btn btn-success w-100 mb-2">Download Attendance Certificate</button>
+                <button id="previewCertificate" class="btn btn-outline-green w-100">Preview Certificate</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Certificate Preview Section -->
+      <div class="certificate-preview" id="certificatePreview">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h3>Certificate Preview</h3>
+          <button class="btn btn-green" id="closePreview">Close Preview</button>
+        </div>
+        <div class="certificate-container" id="certificateContainer">
+          <!-- Certificate content will be dynamically generated here -->
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="mt-5">
+        <h3 class="mb-4">Contact Us</h3>
+        <div class="contact-form">
+          <form action="https://formspree.io/f/xzzaqbwr" method="POST" class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Your Name</label>
+              <input type="text" name="name" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Your Email</label>
+              <input type="email" name="_replyto" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Message</label>
+              <textarea name="message" rows="4" class="form-control" required></textarea>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-green">Send Message</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="text-center">
+        <p>Produced by <strong>SRM IT Solutions</strong>. For official confirmation contact the SRM office.</p>
+        <a href="https://srm-it-solutions.github.io/WEBSITE/" target="_blank" class="btn btn-green visit-btn">🌐 Visit Our Website</a>
+      </footer>
+    </div>
+  </div>
+
+  <!-- Admin Login Page -->
+  <div class="container py-5" id="adminLoginPage" style="display: none;">
+    <div class="login-container">
+      <div class="text-center mb-4">
+        <div class="logo mx-auto mb-3">SRM</div>
+        <h2>Admin Login</h2>
+        <p class="text-muted">Access the certificate management system</p>
+      </div>
+      
+      <form id="loginForm">
+        <div class="mb-3">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-control" id="adminUsername" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="adminPassword" required>
+        </div>
+        <button type="submit" class="btn btn-green w-100">Login</button>
+      </form>
+      
+      <div class="text-center mt-3">
+        <button class="btn btn-link" id="backToMainBtn">← Back to Main Page</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Panel -->
+  <div class="container py-5 admin-panel" id="adminPanel">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <h2>Certificate Management</h2>
+        <p class="text-muted mb-0">Manage and verify all certificates</p>
+      </div>
+      <div>
+        <button class="btn btn-green me-2" id="addCertBtn">Add Certificate</button>
+        <button class="btn btn-outline-secondary" id="logoutBtn">Logout</button>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <h4 class="mb-3">All Certificates</h4>
+      <div class="table-responsive">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Certificate ID</th>
+              <th>Name</th>
+              <th>Roll No</th>
+              <th>Course</th>
+              <th>Internship</th>
+              <th>Period</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="certificatesTableBody">
+            <!-- Certificates will be populated here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Add/Edit Certificate Form -->
+    <div class="admin-card" id="certFormCard" style="display: none;">
+      <h4 id="formTitle" class="mb-3">Add New Certificate</h4>
+      <form id="certificateForm">
+        <input type="hidden" id="editCertId">
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Certificate ID</label>
+            <input type="text" class="form-control" id="certId" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Name</label>
+            <input type="text" class="form-control" id="name" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Roll No</label>
+            <input type="text" class="form-control" id="roll" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Course</label>
+            <input type="text" class="form-control" id="course" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">College</label>
+            <input type="text" class="form-control" id="college" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Internship</label>
+            <input type="text" class="form-control" id="internship" required>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Start Date</label>
+            <input type="date" class="form-control" id="start" required>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">End Date</label>
+            <input type="date" class="form-control" id="end" required>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">Working Days</label>
+            <input type="number" class="form-control" id="days" required>
+          </div>
+          <div class="col-12 mb-3">
+            <label class="form-label">Remarks</label>
+            <textarea class="form-control" id="remarks" rows="2"></textarea>
+          </div>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-green">Save Certificate</button>
+          <button type="button" class="btn btn-secondary" id="cancelFormBtn">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Landing animation
+    window.addEventListener("load", () => {
+      document.body.classList.add("loaded");
+    });
+
+    // Initialize JSON database
+    let certDB = {
+      "SRMWDI0012": {
+        "name": "Sakthivel RM",
+        "roll": "24132166504321010",
+        "course": "Postgraduate",
+        "college": "Government Arts & Science College - Thiruvennainallur",
+        "internship": "Web Development Intern",
+        "start": "2025-06-16",
+        "end": "2025-07-25",
+        "days": "30",
+        "remarks": "Completed successfully"
+      },
+      "SRMWDI0013": {
+        "name": "Priya Sharma",
+        "roll": "24132166504321011",
+        "course": "Undergraduate",
+        "college": "Government Arts & Science College - Thiruvennainallur",
+        "internship": "Data Science Intern",
+        "start": "2025-06-01",
+        "end": "2025-07-15",
+        "days": "30",
+        "remarks": "Excellent performance"
+      }
+    };
+
+    // Admin credentials
+    const adminCredentials = {
+      username: "admin",
+      password: "admin123"
+    };
+
+    // DOM Elements
+    const certNoInput = document.getElementById('certNo');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const resultDiv = document.getElementById('result');
+    const pdfButtons = document.getElementById('pdfButtons');
+    const downloadAttend = document.getElementById('downloadAttend');
+    const previewCertificate = document.getElementById('previewCertificate');
+    const certificatePreview = document.getElementById('certificatePreview');
+    const certificateContainer = document.getElementById('certificateContainer');
+    const closePreview = document.getElementById('closePreview');
+    const adminLoginBtn = document.getElementById('adminLoginBtn');
+    const adminLoginPage = document.getElementById('adminLoginPage');
+    const verificationPage = document.getElementById('verificationPage');
+    const adminPanel = document.getElementById('adminPanel');
+    const loginForm = document.getElementById('loginForm');
+    const backToMainBtn = document.getElementById('backToMainBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const addCertBtn = document.getElementById('addCertBtn');
+    const certFormCard = document.getElementById('certFormCard');
+    const certificateForm = document.getElementById('certificateForm');
+    const cancelFormBtn = document.getElementById('cancelFormBtn');
+    const certificatesTableBody = document.getElementById('certificatesTableBody');
+    const formTitle = document.getElementById('formTitle');
+    const editCertId = document.getElementById('editCertId');
+
+    const { jsPDF } = window.jspdf;
+
+    // Current certificate data for preview and download
+    let currentCertificateData = null;
+
+    // Page Navigation Functions
+    function showVerificationPage() {
+      verificationPage.style.display = 'block';
+      adminLoginPage.style.display = 'none';
+      adminPanel.style.display = 'none';
+      certificatePreview.style.display = 'none';
+    }
+
+    function showAdminLoginPage() {
+      verificationPage.style.display = 'none';
+      adminLoginPage.style.display = 'block';
+      adminPanel.style.display = 'none';
+      certificatePreview.style.display = 'none';
+    }
+
+    function showAdminPanel() {
+      verificationPage.style.display = 'none';
+      adminLoginPage.style.display = 'none';
+      adminPanel.style.display = 'block';
+      certificatePreview.style.display = 'none';
+      loadCertificatesTable();
+    }
+
+    // Event Listeners for Navigation
+    adminLoginBtn.addEventListener('click', showAdminLoginPage);
+    backToMainBtn.addEventListener('click', showVerificationPage);
+
+    // Admin Login
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('adminUsername').value;
+      const password = document.getElementById('adminPassword').value;
+      
+      if (username === adminCredentials.username && password === adminCredentials.password) {
+        showAdminPanel();
+      } else {
+        alert('Invalid username or password');
+      }
+    });
+
+    // Logout
+    logoutBtn.addEventListener('click', function() {
+      showVerificationPage();
+      loginForm.reset();
+    });
+
+    // Certificate Verification Functions
+    function renderDetails(data, certId){
+      return `
+        <div class="fw-bold mb-2 text-success">✅ Certificate Verified Successfully</div>
+        <div class="row">
+          <div class="col-md-6"><strong>Name:</strong> ${data.name}</div>
+          <div class="col-md-6"><strong>Roll No:</strong> ${data.roll}</div>
+          <div class="col-md-6"><strong>Course:</strong> ${data.course}</div>
+          <div class="col-md-6"><strong>College:</strong> ${data.college}</div>
+          <div class="col-md-6"><strong>Internship:</strong> ${data.internship}</div>
+          <div class="col-md-6"><strong>Period:</strong> ${formatDate(data.start)} to ${formatDate(data.end)}</div>
+          <div class="col-md-6"><strong>Working Days:</strong> ${data.days}</div>
+          <div class="col-12 mt-2"><strong>Remarks:</strong> ${data.remarks}</div>
+        </div>
+      `;
+    }
+
+    function formatDate(dateString) {
+      const options = { year: 'numeric', month: 'short', day: 'numeric' };
+      return new Date(dateString).toLocaleDateString('en-US', options);
+    }
+
+    function renderNotFound(input){
+      return `<div class="fw-bold mb-2 text-danger">❌ Certificate Not Found</div>
+        <small class="text-muted">No record matches <strong>${input}</strong>. Please check the number or contact the SRM office.</small>`;
+    }
+
+    // Generate Certificate Preview
+    function generateCertificatePreview(data, certId) {
+      return `
+        <div class="certificate-header">
+          <div class="certificate-title">Certificate of Attendance</div>
+          <div class="certificate-subtitle">SRM IT Solutions</div>
+          <div class="certificate-subtitle">Internship Program</div>
+        </div>
+        
+        <div class="certificate-body">
+          <p>This is to certify that</p>
+          <div class="certificate-name">${data.name}</div>
+          <p>has successfully completed the internship program as</p>
+          
+          <div class="certificate-details">
+            <div class="certificate-detail-item">
+              <span class="certificate-detail-label">Roll No:</span> ${data.roll}
+            </div>
+            <div class="certificate-detail-item">
+              <span class="certificate-detail-label">Course:</span> ${data.course}
+            </div>
+            <div class="certificate-detail-item">
+              <span class="certificate-detail-label">College:</span> ${data.college}
+            </div>
+            <div class="certificate-detail-item">
+              <span class="certificate-detail-label">Internship:</span> ${data.internship}
+            </div>
+            <div class="certificate-detail-item">
+              <span class="certificate-detail-label">Period:</span> ${formatDate(data.start)} to ${formatDate(data.end)}
+            </div>
+            <div class="certificate-detail-item">
+              <span class="certificate-detail-label">Working Days:</span> ${data.days}
+            </div>
+          </div>
+          
+          <p>During this period, ${data.name} demonstrated commitment, punctuality, and active participation in all assigned tasks. ${data.name} successfully completed the internship program with ${data.remarks.toLowerCase()}.</p>
+        </div>
+        
+        <div class="certificate-footer">
+          <div class="signature-area">
+            <div class="signature-line"></div>
+            <div class="signature-name">John Smith</div>
+            <div class="signature-title">Internship Coordinator</div>
+          </div>
+          
+          <div class="signature-area">
+            <div class="signature-line">
+              <img src="sign.png" alt="Authorized Signature" style="max-width: 150px; max-height: 60px; margin-top: -40px;">
+            </div>
+            <div class="signature-name">Sarah Johnson</div>
+            <div class="signature-title">Director, SRM IT Solutions</div>
+          </div>
+        </div>
+        
+        <div class="certificate-id">
+          Certificate ID: ${certId} | Issued on: ${new Date().toLocaleDateString()}
+        </div>
+      `;
+    }
+
+    // ✅ Modern Attendance Certificate with Professional Design
+    async function generateAttendancePDF(data, certId){
+      const doc = new jsPDF("p", "mm", "a4");
+      
+      // Background with gradient effect
+      doc.setFillColor(248, 250, 252);
+      doc.rect(0, 0, 210, 297, "F");
+      
+      // Header with decorative elements
+      doc.setFillColor(12, 158, 76);
+      doc.rect(0, 0, 210, 80, "F");
+      
+      // Logo/Title
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(28);
+      doc.setTextColor(255, 255, 255);
+      doc.text("SRM IT SOLUTIONS", 105, 35, { align: "center" });
+      
+      doc.setFontSize(16);
+      doc.setTextColor(255, 255, 255);
+      doc.text("Certificate of Attendance", 105, 50, { align: "center" });
+      
+      // Certificate Border
+      doc.setDrawColor(12, 158, 76);
+      doc.setLineWidth(1);
+      doc.roundedRect(15, 15, 180, 267, 5, 5);
+      
+      // Certificate content
+      doc.setFontSize(14);
+      doc.setTextColor(50, 50, 50);
+      doc.setFont("helvetica", "normal");
+      doc.text("This is to certify that", 105, 110, { align: "center" });
+      
+      // Student name
+      doc.setFontSize(22);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(12, 158, 76);
+      doc.text(data.name, 105, 130, { align: "center" });
+      
+      // Details
+      doc.setFontSize(12);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(80, 80, 80);
+      
+      let yPos = 150;
+      doc.text(`Roll No: ${data.roll}`, 105, yPos, { align: "center" });
+      yPos += 8;
+      doc.text(`Course: ${data.course}`, 105, yPos, { align: "center" });
+      yPos += 8;
+      doc.text(`College: ${data.college}`, 105, yPos, { align: "center" });
+      yPos += 8;
+      doc.text(`Internship: ${data.internship}`, 105, yPos, { align: "center" });
+      yPos += 8;
+      doc.text(`Period: ${formatDate(data.start)} to ${formatDate(data.end)}`, 105, yPos, { align: "center" });
+      yPos += 8;
+      doc.text(`Working Days: ${data.days}`, 105, yPos, { align: "center" });
+      yPos += 15;
+      
+      // Description
+      doc.setFontSize(11);
+      doc.setTextColor(100, 100, 100);
+      const description = `During the internship period, ${data.name} demonstrated commitment, punctuality, and active participation in all assigned tasks. ${data.name} successfully completed the internship program with ${data.remarks.toLowerCase()}.`;
+      const splitText = doc.splitTextToSize(description, 160);
+      doc.text(splitText, 105, yPos, { align: "center" });
+      
+      yPos += 40;
+      
+      // Signature area
+      doc.setDrawColor(200, 200, 200);
+      doc.setLineWidth(0.5);
+      doc.line(40, 230, 90, 230);
+      doc.line(120, 230, 170, 230);
+      
+      // Add signature image
+      try {
+        const signatureImg = new Image();
+        signatureImg.src = "sign.png";
+        await new Promise((resolve, reject) => {
+          signatureImg.onload = resolve;
+          signatureImg.onerror = reject;
+        });
+        doc.addImage(signatureImg, "PNG", 120, 210, 50, 20);
+      } catch (error) {
+        console.log("Signature image not found, using text signature");
+        doc.text("Authorized Signature", 145, 225, { align: "center" });
+      }
+      
+      doc.setFontSize(10);
+      doc.setTextColor(100, 100, 100);
+      doc.text("Athorized", 145, 240, { align: "center" });
+      
+      // Date
+      const today = new Date().toLocaleDateString();
+      doc.text(`Date: ${today}`, 40, 260);
+      
+      // Certificate ID
+      doc.setFontSize(9);
+      doc.setTextColor(150, 150, 150);
+      doc.text(`Certificate ID: ${certId}`, 105, 270, { align: "center" });
+      
+      // Footer note
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text("This certificate is digitally generated and verifiable at SRM IT Solutions portal", 105, 280, { align: "center" });
+      
+      doc.save(`${data.roll}_attendance_certificate.pdf`);
+    }
+
+    // Certificate Management Functions
+    function loadCertificatesTable() {
+      certificatesTableBody.innerHTML = '';
+      
+      for (const certId in certDB) {
+        const cert = certDB[certId];
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${certId}</td>
+          <td>${cert.name}</td>
+          <td>${cert.roll}</td>
+          <td>${cert.course}</td>
+          <td>${cert.internship}</td>
+          <td>${formatDate(cert.start)} to ${formatDate(cert.end)}</td>
+          <td>
+            <button class="action-btn edit-btn" data-id="${certId}">Edit</button>
+            <button class="action-btn delete-btn" data-id="${certId}">Delete</button>
+          </td>
+        `;
+        certificatesTableBody.appendChild(row);
+      }
+      
+      // Add event listeners to edit and delete buttons
+      document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const certId = this.getAttribute('data-id');
+          editCertificate(certId);
+        });
+      });
+      
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const certId = this.getAttribute('data-id');
+          deleteCertificate(certId);
+        });
+      });
+    }
+
+    function editCertificate(certId) {
+      const cert = certDB[certId];
+      document.getElementById('certId').value = certId;
+      document.getElementById('name').value = cert.name;
+      document.getElementById('roll').value = cert.roll;
+      document.getElementById('course').value = cert.course;
+      document.getElementById('college').value = cert.college;
+      document.getElementById('internship').value = cert.internship;
+      document.getElementById('start').value = cert.start;
+      document.getElementById('end').value = cert.end;
+      document.getElementById('days').value = cert.days;
+      document.getElementById('remarks').value = cert.remarks;
+      editCertId.value = certId;
+      
+      formTitle.textContent = 'Edit Certificate';
+      certFormCard.style.display = 'block';
+    }
+
+    function deleteCertificate(certId) {
+      if (confirm(`Are you sure you want to delete certificate ${certId}?`)) {
+        delete certDB[certId];
+        loadCertificatesTable();
+        alert('Certificate deleted successfully');
+      }
+    }
+
+    // Add Certificate Button
+    addCertBtn.addEventListener('click', function() {
+      certificateForm.reset();
+      editCertId.value = '';
+      formTitle.textContent = 'Add New Certificate';
+      certFormCard.style.display = 'block';
+    });
+
+    // Cancel Form
+    cancelFormBtn.addEventListener('click', function() {
+      certFormCard.style.display = 'none';
+    });
+
+    // Save Certificate Form
+    certificateForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const certId = document.getElementById('certId').value;
+      const name = document.getElementById('name').value;
+      const roll = document.getElementById('roll').value;
+      const course = document.getElementById('course').value;
+      const college = document.getElementById('college').value;
+      const internship = document.getElementById('internship').value;
+      const start = document.getElementById('start').value;
+      const end = document.getElementById('end').value;
+      const days = document.getElementById('days').value;
+      const remarks = document.getElementById('remarks').value;
+      
+      // If editing, remove the old entry first
+      if (editCertId.value && editCertId.value !== certId) {
+        delete certDB[editCertId.value];
+      }
+      
+      // Add/update certificate
+      certDB[certId] = {
+        name, roll, course, college, internship, start, end, days, remarks
+      };
+      
+      loadCertificatesTable();
+      certFormCard.style.display = 'none';
+      alert('Certificate saved successfully');
+    });
+
+    // Verification Button
+    verifyBtn.addEventListener('click', ()=>{
+      const val = certNoInput.value.trim();
+      resultDiv.style.display = 'block';
+      pdfButtons.style.display = 'none';
+      certificatePreview.style.display = 'none';
+      resultDiv.classList.remove('notfound');
+      resultDiv.innerHTML = '';
+
+      if(!val){
+        resultDiv.innerHTML = '<small class="text-muted">Please enter a certificate number.</small>';
+        return;
+      }
+
+      const data = certDB[val];
+      if(data){
+        currentCertificateData = data;
+        resultDiv.innerHTML = renderDetails(data, val);
+        pdfButtons.style.display = 'block';
+        downloadAttend.onclick = () => generateAttendancePDF(data, val);
+        previewCertificate.onclick = () => {
+          certificateContainer.innerHTML = generateCertificatePreview(data, val);
+          certificatePreview.style.display = 'block';
+        };
+      } else {
+        resultDiv.classList.add('notfound');
+        resultDiv.innerHTML = renderNotFound(val);
+      }
+    });
+
+    // Close Preview Button
+    closePreview.addEventListener('click', () => {
+      certificatePreview.style.display = 'none';
+    });
+
+    certNoInput.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter') verifyBtn.click();
+    });
+
+    // Initialize the page
+    showVerificationPage();
+  </script>
+</body>
+</html>
